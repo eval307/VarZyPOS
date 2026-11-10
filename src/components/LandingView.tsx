@@ -210,7 +210,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onOpenAuth, onGetStart
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-sm sm:text-base text-neutral-600 leading-relaxed max-w-2xl mx-auto"
           >
-            VarzyPos menghubungkan seluruh perangkat kasir dan inventaris Anda dalam satu workspace Cloud Firestore. Bekerja serentak saat toko ramai tanpa khawatir selisih stok.
+            VarzyPos menghubungkan seluruh perangkat kasir dan inventaris Anda dalam satu workspace Cloud Supabase Real-Time. Bekerja serentak saat toko ramai tanpa khawatir selisih stok.
           </motion.p>
 
           <motion.div

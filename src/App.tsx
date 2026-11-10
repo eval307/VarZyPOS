@@ -73,7 +73,6 @@ function POSAppContent() {
     : { ...DEFAULT_STAFF_PERMISSIONS, ...(userProfile?.permissions || {}) };
 
   const handleLogout = async () => {
-    setAuthMode('login');
     setActiveTab('dashboard');
     setIsCategoryModalOpen(false);
     setCart([]);
@@ -87,10 +86,6 @@ function POSAppContent() {
       setStoreStorage(storeId, 'active_tab', 'dashboard');
     }
     await logout(false);
-    try {
-      window.history.replaceState({ loggedOut: true }, '', window.location.pathname);
-      window.history.pushState({ loggedOut: true }, '', window.location.pathname);
-    } catch {}
   };
 
   // Browser History & Undo Lock:
@@ -161,10 +156,6 @@ function POSAppContent() {
   const [teamMembers, setTeamMembers] = useState<StoreMember[]>(() =>
     getStoreStorage(storeId, 'members', [])
   );
-
-  // Landing & Auth modal view states
-  const [showLanding, setShowLanding] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   // Handle switching active tab and save tab preference per store
   useEffect(() => {
@@ -868,33 +859,15 @@ function AppWithAuth() {
     updateUserPassword,
     cancelPasswordRecovery,
   } = useAuth();
-  const [showLanding, setShowLanding] = useState(() => {
-    try {
-      const path = window.location.pathname;
-      const hash = window.location.hash;
-      const search = window.location.search;
-      if (
-        path === '/login' ||
-        path === '/register' ||
-        path === '/auth' ||
-        hash === '#login' ||
-        hash === '#register' ||
-        search.includes('mode=login') ||
-        search.includes('mode=register')
-      ) {
-        return false;
-      }
-    } catch {}
-    return true;
-  });
-  const [authMode, setAuthMode] = useState<'login' | 'register'>(() => {
-    try {
-      const path = window.location.pathname;
-      const hash = window.location.hash;
-      if (path === '/register' || hash === '#register') return 'register';
-    } catch {}
-    return 'login';
-  });
+  const [showLanding, setShowLanding] = useState(true);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+
+  // Whenever unauthenticated, ALWAYS ensure the main landing page is shown first
+  useEffect(() => {
+    if (!userProfile) {
+      setShowLanding(true);
+    }
+  }, [userProfile]);
 
   return (
     <>
