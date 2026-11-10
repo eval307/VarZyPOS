@@ -1,0 +1,305 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   TEMA TERANG, DINGIN, KALEM (COOL NORDIC / ARCTIC SLATE THEME)
+   ============================================================ */
+@theme {
+  /* Cool Slate Neutrals (Menggantikan warm neutral menjadi dingin & bersih) */
+  --color-neutral-50: #f8fafc;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-300: #cbd5e1;
+  --color-neutral-400: #94a3b8;
+  --color-neutral-500: #64748b;
+  --color-neutral-600: #475569;
+  --color-neutral-700: #334155;
+  --color-neutral-800: #1e293b;
+  --color-neutral-900: #0f172a;
+  --color-neutral-950: #020617;
+
+  /* Cool Mint / Arctic Teal (Aksen dingin, segar, dan menenangkan mata) */
+  --color-emerald-50: #f0fdfa;
+  --color-emerald-100: #ccfbf1;
+  --color-emerald-200: #99f6e4;
+  --color-emerald-300: #5eead4;
+  --color-emerald-400: #2dd4bf;
+  --color-emerald-500: #14b8a6;
+  --color-emerald-600: #0d9488;
+  --color-emerald-700: #0f766e;
+  --color-emerald-800: #115e59;
+  --color-emerald-900: #134e4a;
+  --color-emerald-950: #042f2e;
+
+  /* Cool Sky / Oceanic Blue (Aksen pelengkap yang kalem) */
+  --color-sky-50: #f0f9ff;
+  --color-sky-100: #e0f2fe;
+  --color-sky-200: #bae6fd;
+  --color-sky-300: #7dd3fc;
+  --color-sky-400: #38bdf8;
+  --color-sky-500: #0ea5e9;
+  --color-sky-600: #0284c7;
+  --color-sky-700: #0369a1;
+  --color-sky-800: #075985;
+  --color-sky-900: #0c4a6e;
+  --color-sky-950: #082f49;
+}
+
+/* ============================================================
+   TEMA WARNA AKSEN APLIKASI (DYNAMIC ACCENT PALETTES)
+   ============================================================ */
+html[data-accent="indigo"] {
+  --color-emerald-50: #eef2ff;
+  --color-emerald-100: #e0e7ff;
+  --color-emerald-200: #c7d2fe;
+  --color-emerald-300: #a5b4fc;
+  --color-emerald-400: #818cf8;
+  --color-emerald-500: #6366f1;
+  --color-emerald-600: #4f46e5;
+  --color-emerald-700: #4338ca;
+  --color-emerald-800: #3730a3;
+  --color-emerald-900: #312e81;
+  --color-emerald-950: #1e1b4b;
+  --color-teal-600: #4f46e5;
+  --color-teal-700: #3730a3;
+}
+
+html[data-accent="violet"] {
+  --color-emerald-50: #f5f3ff;
+  --color-emerald-100: #ede9fe;
+  --color-emerald-200: #ddd6fe;
+  --color-emerald-300: #c4b5fd;
+  --color-emerald-400: #a78bfa;
+  --color-emerald-500: #8b5cf6;
+  --color-emerald-600: #7c3aed;
+  --color-emerald-700: #6d28d9;
+  --color-emerald-800: #5b21b6;
+  --color-emerald-900: #4c1d95;
+  --color-emerald-950: #2e1065;
+  --color-teal-600: #7c3aed;
+  --color-teal-700: #5b21b6;
+}
+
+html[data-accent="rose"] {
+  --color-emerald-50: #fff1f2;
+  --color-emerald-100: #ffe4e6;
+  --color-emerald-200: #fecdd3;
+  --color-emerald-300: #fda4af;
+  --color-emerald-400: #fb7185;
+  --color-emerald-500: #f43f5e;
+  --color-emerald-600: #e11d48;
+  --color-emerald-700: #be123c;
+  --color-emerald-800: #9f1239;
+  --color-emerald-900: #881337;
+  --color-emerald-950: #4c0519;
+  --color-teal-600: #e11d48;
+  --color-teal-700: #9f1239;
+}
+
+html[data-accent="amber"] {
+  --color-emerald-50: #fffbeb;
+  --color-emerald-100: #fef3c7;
+  --color-emerald-200: #fde68a;
+  --color-emerald-300: #fcd34d;
+  --color-emerald-400: #fbbf24;
+  --color-emerald-500: #f59e0b;
+  --color-emerald-600: #d97706;
+  --color-emerald-700: #b45309;
+  --color-emerald-800: #92400e;
+  --color-emerald-900: #78350f;
+  --color-emerald-950: #451a03;
+  --color-teal-600: #d97706;
+  --color-teal-700: #92400e;
+}
+
+html[data-accent="slate"] {
+  --color-emerald-50: #f8fafc;
+  --color-emerald-100: #f1f5f9;
+  --color-emerald-200: #e2e8f0;
+  --color-emerald-300: #cbd5e1;
+  --color-emerald-400: #94a3b8;
+  --color-emerald-500: #64748b;
+  --color-emerald-600: #475569;
+  --color-emerald-700: #334155;
+  --color-emerald-800: #1e293b;
+  --color-emerald-900: #0f172a;
+  --color-emerald-950: #020617;
+  --color-teal-600: #475569;
+  --color-teal-700: #1e293b;
+}
+
+html[data-accent="emerald"] {
+  --color-emerald-50: #f0fdfa;
+  --color-emerald-100: #ccfbf1;
+  --color-emerald-200: #99f6e4;
+  --color-emerald-300: #5eead4;
+  --color-emerald-400: #2dd4bf;
+  --color-emerald-500: #14b8a6;
+  --color-emerald-600: #0d9488;
+  --color-emerald-700: #0f766e;
+  --color-emerald-800: #115e59;
+  --color-emerald-900: #134e4a;
+  --color-emerald-950: #042f2e;
+  --color-teal-600: #0d9488;
+  --color-teal-700: #0f766e;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background-color: #f1f5f9;
+  color: #1e293b;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle, Calm Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0b111e;
+  color: #f1f5f9;
+}
+
+/* Universal Dark Theme Adaptations for all App Pages */
+html.dark .bg-white {
+  background-color: #111827 !important;
+  color: #f8fafc;
+}
+
+html.dark .bg-neutral-50 {
+  background-color: #141c2e !important;
+}
+
+html.dark .bg-neutral-100 {
+  background-color: #1a2234 !important;
+}
+
+html.dark .bg-neutral-200,
+html.dark .bg-neutral-200\/70,
+html.dark .bg-neutral-200\/80 {
+  background-color: #242f44 !important;
+}
+
+html.dark .border-neutral-100,
+html.dark .border-neutral-200,
+html.dark .border-neutral-200\/80,
+html.dark .border-neutral-200\/90,
+html.dark .border-neutral-300,
+html.dark .border-neutral-300\/70,
+html.dark .border-neutral-300\/80 {
+  border-color: #222d42 !important;
+}
+
+html.dark .text-neutral-950,
+html.dark .text-neutral-900,
+html.dark .text-neutral-800 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-neutral-700,
+html.dark .text-neutral-600 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-neutral-500 {
+  color: #94a3b8 !important;
+}
+
+html.dark .text-neutral-400 {
+  color: #64748b !important;
+}
+
+/* Dark Mode Form Inputs & Controls */
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select,
+html.dark textarea {
+  background-color: #141c2e !important;
+  color: #f8fafc !important;
+  border-color: #28354d !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+html.dark .hover\:bg-neutral-50:hover {
+  background-color: #1a2234 !important;
+}
+
+html.dark .hover\:bg-neutral-100:hover {
+  background-color: #242f44 !important;
+}
+
+html.dark .hover\:bg-neutral-200:hover {
+  background-color: #2d3b55 !important;
+}
+
+/* Thermal receipt preview and print must always stay white paper */
+#receipt-print-area,
+#receipt-print-area * {
+  background-color: #ffffff !important;
+  color: #171717 !important;
+  border-color: #e5e5e5 !important;
+}
+
+#receipt-print-area .bg-neutral-900 {
+  background-color: #171717 !important;
+  color: #ffffff !important;
+}
+
+#receipt-print-area .bg-neutral-950 {
+  background-color: #0a0a0a !important;
+  color: #ffffff !important;
+}
+
+#receipt-print-area .text-white {
+  color: #ffffff !important;
+}
+
+#receipt-print-area .text-emerald-300 {
+  color: #6ee7b7 !important;
+}
+
+#receipt-print-area .text-rose-600 {
+  color: #e11d48 !important;
+}
+
+#receipt-print-area .text-emerald-700 {
+  color: #047857 !important;
+}
+
+#receipt-print-area img {
+  background-color: transparent !important;
+}

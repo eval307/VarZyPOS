@@ -1,0 +1,193 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile for cashiers, admins, and store owners",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "activeStoreId": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Store": {
+      "title": "Store",
+      "description": "Isolated store workspace for a team",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "ownerUid": { "type": "string" },
+        "ownerEmail": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "ownerUid", "ownerEmail"]
+    },
+    "StoreMember": {
+      "title": "StoreMember",
+      "description": "Team member registered to a store with specific role and feature permissions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "storeId": { "type": "string" },
+        "email": { "type": "string" },
+        "username": { "type": "string", "maxLength": 50 },
+        "name": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "enum": ["owner", "admin", "pengguna"] },
+        "permissions": { "type": "object" },
+        "uid": { "type": "string" },
+        "invitedBy": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "storeId", "email", "name", "role", "permissions"]
+    },
+    "Invite": {
+      "title": "Invite",
+      "description": "Pending invitation by email to join a store workspace",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "username": { "type": "string", "maxLength": 50 },
+        "storeId": { "type": "string" },
+        "storeName": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "enum": ["owner", "admin", "pengguna"] },
+        "permissions": { "type": "object" },
+        "invitedBy": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "email", "storeId", "role", "permissions"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Retail item catalog with real-time stock isolated per store",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 150 },
+        "sku": { "type": "string", "maxLength": 50 },
+        "category": { "type": "string", "maxLength": 60 },
+        "costPrice": { "type": "number" },
+        "price": { "type": "number" },
+        "stock": { "type": "number" },
+        "minStock": { "type": "number" },
+        "unit": { "type": "string", "maxLength": 30 },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "name", "sku", "category", "price", "stock", "unit"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Product classification category per store",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 60 },
+        "description": { "type": "string", "maxLength": 200 }
+      },
+      "required": ["id", "name"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Completed or cancelled sales order record per store",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "invoiceNumber": { "type": "string", "maxLength": 50 },
+        "timestamp": { "type": "string" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "discountAmount": { "type": "number" },
+        "taxAmount": { "type": "number" },
+        "taxRate": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "totalCost": { "type": "number" },
+        "profit": { "type": "number" },
+        "paymentMethod": { "type": "string", "enum": ["cash", "qris", "transfer", "debit"] },
+        "cashGiven": { "type": "number" },
+        "change": { "type": "number" },
+        "cashierName": { "type": "string", "maxLength": 100 },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "status": { "type": "string", "enum": ["completed", "cancelled"] },
+        "cancelledReason": { "type": "string", "maxLength": 200 }
+      },
+      "required": ["id", "invoiceNumber", "timestamp", "items", "totalAmount", "paymentMethod", "status"]
+    },
+    "StockAdjustment": {
+      "title": "StockAdjustment",
+      "description": "Stock mutation audit trail entry per store",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "productId": { "type": "string" },
+        "productName": { "type": "string", "maxLength": 150 },
+        "sku": { "type": "string", "maxLength": 50 },
+        "previousStock": { "type": "number" },
+        "newStock": { "type": "number" },
+        "difference": { "type": "number" },
+        "reason": { "type": "string", "enum": ["restock", "sale", "damaged", "expired", "return", "manual"] },
+        "notes": { "type": "string", "maxLength": 250 },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "productId", "previousStock", "newStock", "difference", "reason", "timestamp"]
+    },
+    "StoreSettings": {
+      "title": "StoreSettings",
+      "description": "Store configuration and receipt preferences per store",
+      "type": "object",
+      "properties": {
+        "storeName": { "type": "string", "maxLength": 100 },
+        "tagline": { "type": "string", "maxLength": 150 },
+        "address": { "type": "string", "maxLength": 250 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "cashierName": { "type": "string", "maxLength": 60 },
+        "receiptFooter": { "type": "string", "maxLength": 250 },
+        "taxEnabled": { "type": "boolean" },
+        "taxRate": { "type": "number" },
+        "soundEnabled": { "type": "boolean" }
+      },
+      "required": ["storeName"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profile collection"
+    },
+    "/invites/{inviteId}": {
+      "schema": { "$ref": "#/entities/Invite" },
+      "description": "Global invite records indexed by email for team onboarding"
+    },
+    "/stores/{storeId}": {
+      "schema": { "$ref": "#/entities/Store" },
+      "description": "Isolated store workspace records"
+    },
+    "/stores/{storeId}/members/{memberId}": {
+      "schema": { "$ref": "#/entities/StoreMember" },
+      "description": "Team members and RBAC feature permissions within the store"
+    },
+    "/stores/{storeId}/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Store-isolated real-time products catalog"
+    },
+    "/stores/{storeId}/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Store-isolated item categories"
+    },
+    "/stores/{storeId}/transactions/{transactionId}": {
+      "schema": { "$ref": "#/entities/Transaction" },
+      "description": "Store-isolated sales transactions"
+    },
+    "/stores/{storeId}/stockAdjustments/{adjustmentId}": {
+      "schema": { "$ref": "#/entities/StockAdjustment" },
+      "description": "Store-isolated audit trail logs"
+    },
+    "/stores/{storeId}/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/StoreSettings" },
+      "description": "Store-isolated settings configuration"
+    }
+  }
+}

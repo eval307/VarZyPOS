@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // User profiles - allow read & write for authenticated users so owners can initialize member records
+    match /users/{userId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Team invites indexed by email lookup
+    match /invites/{inviteId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Isolated Store Workspace and Subcollections
+    match /stores/{storeId} {
+      allow read, write: if isSignedIn();
+
+      // Store Team Members & Roles
+      match /members/{memberId} {
+        allow read, write: if isSignedIn();
+      }
+
+      // Store-isolated Products
+      match /products/{productId} {
+        allow read, write: if isSignedIn();
+      }
+
+      // Store-isolated Categories
+      match /categories/{categoryId} {
+        allow read, write: if isSignedIn();
+      }
+
+      // Store-isolated Transactions
+      match /transactions/{transactionId} {
+        allow read, write: if isSignedIn();
+      }
+
+      // Store-isolated Stock Adjustments
+      match /stockAdjustments/{adjustmentId} {
+        allow read, write: if isSignedIn();
+      }
+
+      // Store-isolated Settings
+      match /settings/{settingId} {
+        allow read, write: if isSignedIn();
+      }
+    }
+
+    // Legacy root fallback collections
+    match /products/{productId} {
+      allow read, write: if isSignedIn();
+    }
+    match /categories/{categoryId} {
+      allow read, write: if isSignedIn();
+    }
+    match /transactions/{transactionId} {
+      allow read, write: if isSignedIn();
+    }
+    match /stockAdjustments/{adjustmentId} {
+      allow read, write: if isSignedIn();
+    }
+    match /storeSettings/{settingId} {
+      allow read, write: if isSignedIn();
+    }
+  }
+}

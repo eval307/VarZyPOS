@@ -1,0 +1,8 @@
+{
+  "firestore": {
+    "databaseId": "ai-studio-kasirkurealtimep-1932a47a-1e8e-49a0-9114-824ffe6e487e",
+    "rules": "firestore.rules",
+    "edition": "ENTERPRISE",
+    "dataAccessMode": "FIRESTORE_NATIVE"
+  }
+}
