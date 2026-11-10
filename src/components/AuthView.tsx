@@ -18,6 +18,7 @@ import {
 import { motion } from 'framer-motion';
 import { useAuth } from '../supabase/supabaseAuthContext';
 import { soundFx } from '../utils/audio';
+import { DEFAULT_EMERALD_VARS } from '../utils/theme';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
@@ -154,7 +155,10 @@ export const AuthView: React.FC<AuthViewProps> = ({
   };
 
   return (
-    <div className="public-theme-locked min-h-screen w-full flex items-center justify-center bg-neutral-50 p-4 relative selection:bg-emerald-500 selection:text-white">
+    <div
+      className="public-theme-locked min-h-screen w-full flex items-center justify-center bg-neutral-50 p-4 relative selection:bg-emerald-500 selection:text-white"
+      style={DEFAULT_EMERALD_VARS}
+    >
       {/* Decorative Glow (Fixed Default Emerald Green) */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-72 bg-gradient-to-b from-emerald-100/70 via-emerald-50/40 to-transparent blur-3xl pointer-events-none" />
 

@@ -12,6 +12,22 @@ export type BackgroundTheme =
   | 'dots'
   | 'custom';
 
+export const DEFAULT_EMERALD_VARS: React.CSSProperties = {
+  ['--color-emerald-50' as any]: '#f0fdfa',
+  ['--color-emerald-100' as any]: '#ccfbf1',
+  ['--color-emerald-200' as any]: '#99f6e4',
+  ['--color-emerald-300' as any]: '#5eead4',
+  ['--color-emerald-400' as any]: '#2dd4bf',
+  ['--color-emerald-500' as any]: '#10b981',
+  ['--color-emerald-600' as any]: '#059669',
+  ['--color-emerald-700' as any]: '#047857',
+  ['--color-emerald-800' as any]: '#065f46',
+  ['--color-emerald-900' as any]: '#064e3b',
+  ['--color-emerald-950' as any]: '#022c22',
+  ['--color-teal-600' as any]: '#0d9488',
+  ['--color-teal-700' as any]: '#0f766e',
+};
+
 export function getStoredTheme(): ThemeMode {
   try {
     const saved = localStorage.getItem('app_theme');
@@ -72,28 +88,71 @@ export function getStoredCustomBgUrl(): string {
   }
 }
 
-export function applyTheme(theme: ThemeMode = 'light', persist: boolean = true) {
+/**
+ * Completely clean the global document root (html, body)
+ * Guarantees Landing page, Login, and Register always render in the default light green theme.
+ */
+export function resetGlobalRootTheme() {
+  if (typeof document === 'undefined') return;
   const root = document.documentElement;
+  root.classList.remove('dark');
+  root.removeAttribute('data-theme');
+  root.removeAttribute('data-accent');
+  root.removeAttribute('data-background');
+
+  const varsToClear = [
+    '--color-emerald-50',
+    '--color-emerald-100',
+    '--color-emerald-200',
+    '--color-emerald-300',
+    '--color-emerald-400',
+    '--color-emerald-500',
+    '--color-emerald-600',
+    '--color-emerald-700',
+    '--color-emerald-800',
+    '--color-emerald-900',
+    '--color-emerald-950',
+    '--color-teal-600',
+    '--color-teal-700',
+  ];
+  varsToClear.forEach((prop) => root.style.removeProperty(prop));
+
+  if (document.body) {
+    document.body.classList.remove('dark');
+    document.body.style.backgroundColor = '';
+    document.body.style.color = '';
+  }
+}
+
+export function applyTheme(theme: ThemeMode = 'light', persist: boolean = true) {
   const systemPrefersDark =
     typeof window !== 'undefined' &&
     window.matchMedia &&
     window.matchMedia('(prefers-color-scheme: dark)').matches;
   const isDark = theme === 'dark' || (theme === 'system' && systemPrefersDark);
 
-  if (isDark) {
-    root.classList.add('dark');
-    root.setAttribute('data-theme', 'dark');
-  } else {
-    root.classList.remove('dark');
-    root.setAttribute('data-theme', 'light');
+  // Apply to internal POS container if present in DOM
+  const target = document.getElementById('pos-app-root');
+  if (target) {
+    if (isDark) {
+      target.classList.add('dark');
+      target.setAttribute('data-theme', 'dark');
+    } else {
+      target.classList.remove('dark');
+      target.setAttribute('data-theme', 'light');
+    }
+  }
+
+  // Ensure document.documentElement is never permanently locked in dark mode
+  if (typeof document !== 'undefined') {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.removeAttribute('data-theme');
   }
 
   if (persist && typeof localStorage !== 'undefined') {
     try {
       localStorage.setItem('app_theme', theme);
-    } catch {
-      // ignore quota / access errors
-    }
+    } catch {}
   }
 }
 
@@ -104,12 +163,12 @@ export const ACCENT_PALETTES: Record<ThemeAccent, Record<string, string>> = {
     '--color-emerald-200': '#99f6e4',
     '--color-emerald-300': '#5eead4',
     '--color-emerald-400': '#2dd4bf',
-    '--color-emerald-500': '#14b8a6',
-    '--color-emerald-600': '#0d9488',
-    '--color-emerald-700': '#0f766e',
-    '--color-emerald-800': '#115e59',
-    '--color-emerald-900': '#134e4a',
-    '--color-emerald-950': '#042f2e',
+    '--color-emerald-500': '#10b981',
+    '--color-emerald-600': '#059669',
+    '--color-emerald-700': '#047857',
+    '--color-emerald-800': '#065f46',
+    '--color-emerald-900': '#064e3b',
+    '--color-emerald-950': '#022c22',
     '--color-teal-600': '#0d9488',
     '--color-teal-700': '#0f766e',
   },
@@ -191,14 +250,15 @@ export const ACCENT_PALETTES: Record<ThemeAccent, Record<string, string>> = {
 };
 
 export function applyThemeAccent(accent: ThemeAccent = 'emerald', persist: boolean = true) {
-  if (typeof document === 'undefined') return;
-  const root = document.documentElement;
-  root.setAttribute('data-accent', accent);
-
-  const palette = ACCENT_PALETTES[accent] || ACCENT_PALETTES.emerald;
-  Object.entries(palette).forEach(([varName, colorVal]) => {
-    root.style.setProperty(varName, colorVal);
-  });
+  // Apply only to internal POS container if present
+  const target = typeof document !== 'undefined' ? document.getElementById('pos-app-root') : null;
+  if (target) {
+    target.setAttribute('data-accent', accent);
+    const palette = ACCENT_PALETTES[accent] || ACCENT_PALETTES.emerald;
+    Object.entries(palette).forEach(([varName, colorVal]) => {
+      target.style.setProperty(varName, colorVal);
+    });
+  }
 
   if (persist && typeof localStorage !== 'undefined') {
     try {
@@ -212,8 +272,10 @@ export function applyBackgroundTheme(
   customUrl: string = '',
   persist: boolean = true
 ) {
-  const root = document.documentElement;
-  root.setAttribute('data-background', bg);
+  const target = typeof document !== 'undefined' ? document.getElementById('pos-app-root') : null;
+  if (target) {
+    target.setAttribute('data-background', bg);
+  }
 
   if (persist && typeof localStorage !== 'undefined') {
     try {
@@ -236,23 +298,23 @@ export function getBackgroundThemeStyles(
   switch (bg) {
     case 'slate':
       return {
-        containerClass: 'bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100',
+        containerClass: 'bg-slate-100 text-slate-900',
       };
     case 'zinc':
       return {
-        containerClass: 'bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100',
+        containerClass: 'bg-zinc-100 text-zinc-900',
       };
     case 'warm':
       return {
-        containerClass: 'bg-amber-50/50 dark:bg-stone-950 text-stone-900 dark:text-stone-100',
+        containerClass: 'bg-amber-50/50 text-stone-900',
       };
     case 'cool':
       return {
-        containerClass: 'bg-sky-50/50 dark:bg-slate-950 text-slate-900 dark:text-slate-100',
+        containerClass: 'bg-sky-50/50 text-slate-900',
       };
     case 'mesh':
       return {
-        containerClass: 'text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-950',
+        containerClass: 'text-neutral-900 bg-neutral-100',
         inlineStyle: {
           backgroundImage:
             'radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.09) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%), radial-gradient(at 50% 100%, rgba(244, 63, 94, 0.06) 0px, transparent 50%)',
@@ -260,7 +322,7 @@ export function getBackgroundThemeStyles(
       };
     case 'dots':
       return {
-        containerClass: 'text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-950',
+        containerClass: 'text-neutral-900 bg-neutral-100',
         inlineStyle: {
           backgroundImage:
             'radial-gradient(rgba(100, 116, 139, 0.18) 1.5px, transparent 1.5px)',
@@ -270,28 +332,26 @@ export function getBackgroundThemeStyles(
     case 'custom':
       if (customBgUrl && customBgUrl.trim()) {
         return {
-          containerClass: 'text-neutral-900 dark:text-neutral-100 relative',
+          containerClass: 'text-neutral-900 relative',
           inlineStyle: {
             backgroundImage: `url("${customBgUrl.trim()}")`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundAttachment: 'fixed',
           },
-          overlayClass: 'bg-neutral-100/90 dark:bg-neutral-950/90',
+          overlayClass: 'bg-neutral-100/90',
         };
       }
       return {
-        containerClass: 'bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100',
+        containerClass: 'bg-neutral-100 text-neutral-900',
       };
     case 'default':
     default:
       return {
-        containerClass: 'bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100',
+        containerClass: 'bg-neutral-100 text-neutral-900',
       };
   }
 }
-
-let listenerAttached = false;
 
 export function initTheme(
   savedTheme?: ThemeMode,
@@ -307,15 +367,4 @@ export function initTheme(
   applyTheme(effectiveTheme, true);
   applyThemeAccent(effectiveAccent, true);
   applyBackgroundTheme(effectiveBg, effectiveCustomBg, true);
-
-  // Listen to system changes if in system mode
-  if (!listenerAttached && typeof window !== 'undefined' && window.matchMedia) {
-    listenerAttached = true;
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      const current = getStoredTheme();
-      if (current === 'system') {
-        applyTheme('system', false);
-      }
-    });
-  }
 }

@@ -17,6 +17,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { soundFx } from '../utils/audio';
+import { DEFAULT_EMERALD_VARS } from '../utils/theme';
 
 interface LandingViewProps {
   onOpenAuth?: (mode: 'login' | 'register') => void;
@@ -43,7 +44,10 @@ export const LandingView: React.FC<LandingViewProps> = ({
   };
 
   return (
-    <div className="public-theme-locked min-h-screen bg-neutral-50 text-neutral-900 font-sans selection:bg-emerald-500 selection:text-white relative overflow-hidden">
+    <div
+      className="public-theme-locked min-h-screen bg-neutral-50 text-neutral-900 font-sans selection:bg-emerald-500 selection:text-white relative overflow-hidden"
+      style={DEFAULT_EMERALD_VARS}
+    >
       {/* Decorative Background Glows (Fixed Default Green Emerald) */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-emerald-100/70 via-emerald-50/40 to-transparent blur-3xl pointer-events-none" />
       <div className="absolute top-40 right-10 w-72 h-72 rounded-full bg-emerald-200/30 blur-3xl pointer-events-none" />

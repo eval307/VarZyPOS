@@ -61,6 +61,9 @@ import {
   applyThemeAccent,
   applyBackgroundTheme,
   getBackgroundThemeStyles,
+  resetGlobalRootTheme,
+  ACCENT_PALETTES,
+  DEFAULT_EMERALD_VARS,
 } from './utils/theme';
 
 function POSAppContent() {
@@ -85,9 +88,7 @@ function POSAppContent() {
     if (storeId) {
       setStoreStorage(storeId, 'active_tab', 'dashboard');
     }
-    applyTheme('light', false);
-    applyThemeAccent('emerald', false);
-    applyBackgroundTheme('default', '', false);
+    resetGlobalRootTheme();
     await logout(false);
   };
 
@@ -312,6 +313,13 @@ function POSAppContent() {
     storeSettings.customBgUrl,
     storeSettings.language,
   ]);
+
+  // Clean root when POSAppContent unmounts (logout)
+  useEffect(() => {
+    return () => {
+      resetGlobalRootTheme();
+    };
+  }, []);
 
   // Check role-based permission for active tab
   useEffect(() => {
@@ -692,10 +700,24 @@ function POSAppContent() {
   const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
   const bgStyles = getBackgroundThemeStyles(storeSettings.backgroundTheme, storeSettings.customBgUrl);
 
+  const isDark =
+    storeSettings.theme === 'dark' ||
+    (storeSettings.theme === 'system' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const currentAccent = storeSettings.themeAccent || 'emerald';
+  const accentVars = ACCENT_PALETTES[currentAccent] || ACCENT_PALETTES.emerald;
+
   return (
     <div
-      className={`min-h-screen w-full min-w-0 font-sans flex flex-col transition-colors overflow-x-hidden ${bgStyles.containerClass}`}
-      style={bgStyles.inlineStyle}
+      id="pos-app-root"
+      className={`pos-internal-app min-h-screen w-full min-w-0 font-sans flex flex-col transition-colors overflow-x-hidden ${isDark ? 'dark bg-[#0b111e] text-[#f1f5f9]' : 'bg-[#f1f5f9] text-[#1e293b]'} ${bgStyles.containerClass}`}
+      data-accent={currentAccent}
+      style={{
+        ...bgStyles.inlineStyle,
+        ...accentVars,
+      }}
     >
       {/* Background wallpaper overlay - rendered as a fixed background layer so it NEVER creates a containing block for fixed elements */}
       {bgStyles.overlayClass && (
@@ -870,9 +892,7 @@ function AppWithAuth() {
   useEffect(() => {
     if (!userProfile) {
       setShowLanding(true);
-      applyTheme('light', false);
-      applyThemeAccent('emerald', false);
-      applyBackgroundTheme('default', '', false);
+      resetGlobalRootTheme();
     }
   }, [userProfile]);
 
@@ -887,7 +907,10 @@ function AppWithAuth() {
       )}
 
       {loading ? (
-        <div className="public-theme-locked min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-4">
+        <div
+          className="public-theme-locked min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-4"
+          style={DEFAULT_EMERALD_VARS}
+        >
           <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mb-4" />
           <h2 className="text-neutral-900 text-base font-semibold tracking-wide">Memuat VarzyPos...</h2>
           <p className="text-neutral-500 text-xs mt-1">Sistem Kasir &amp; Stok Real-Time</p>
