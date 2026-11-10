@@ -404,9 +404,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               localStorage.setItem('kasirku_cached_user_profile', JSON.stringify(profile));
             } catch {}
           })
-          .catch((e) => console.warn('Profile resolution notice:', e))
+          .catch((e) => {
+            console.warn('Profile resolution notice:', e);
+            // If offline or temporary network issue, keep valid cached profile
+            const cached = localStorage.getItem('kasirku_cached_user_profile');
+            if (cached) {
+              try {
+                setUserProfile(JSON.parse(cached));
+              } catch {}
+            }
+          })
           .finally(() => setLoading(false));
       } else {
+        // No active Supabase Auth user session found:
+        // Check if there is an active valid cached profile (e.g. from employee login or recent session)
+        const cached = localStorage.getItem('kasirku_cached_user_profile');
+        if (cached && isSessionActiveAndValid()) {
+          try {
+            const profile: UserProfile = JSON.parse(cached);
+            if (profile && profile.uid && profile.activeStoreId) {
+              setUserProfile(profile);
+              updateSessionActivity();
+              setLoading(false);
+              return;
+            }
+          } catch (e) {
+            console.warn('[Cached profile restore error]:', e);
+          }
+        }
+
+        // Only clear if no valid session or cache exists
         setCurrentUser(null);
         setUserProfile(null);
         setLoading(false);
@@ -536,7 +563,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     const cleanInput = emailOrUsername.trim().toLowerCase();
 
-    // 1. Direct Employee / Staff Login from Supabase store_members
+    // 1. If input is an email, ALWAYS attempt Supabase Auth first (for Owner & Supabase Auth accounts)
+    if (cleanInput.includes('@')) {
+      try {
+        const { data, error: signInErr } = await supabase.auth.signInWithPassword({
+          email: cleanInput,
+          password: pass,
+        });
+
+        if (!signInErr && data?.user) {
+          updateSessionActivity();
+          setSessionExpired(false);
+          try {
+            localStorage.removeItem(SESSION_EXPIRED_NOTICE_KEY);
+          } catch {}
+
+          setCurrentUser(data.user);
+          const profile = await resolveUserProfileFromSupabase(data.user);
+          setUserProfile(profile);
+          try {
+            localStorage.setItem('kasirku_cached_user_profile', JSON.stringify(profile));
+          } catch {}
+          return;
+        }
+
+        if (signInErr && signInErr.message.includes('Email not confirmed')) {
+          const msg =
+            'Email belum diverifikasi. Buka kotak masuk email Anda dan klik tautan konfirmasi dari Supabase, atau matikan opsi "Confirm email" di Supabase Dashboard (Authentication > Providers > Email).';
+          setError(msg);
+          throw new Error(msg);
+        }
+      } catch (authErr: any) {
+        if (authErr.message?.includes('Email belum diverifikasi')) {
+          throw authErr;
+        }
+        // Fall through to check if it's a staff member without Supabase Auth credentials
+      }
+    }
+
+    // 2. Direct Employee / Staff Login from Supabase store_members (username or staff email)
     try {
       const { data: memberRows } = await supabase
         .from('store_members')
@@ -544,12 +609,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .or(`email.eq.${cleanInput},username.eq.${cleanInput}`);
 
       if (memberRows && memberRows.length > 0) {
-        // If the same username/email belongs to multiple stores, match by password to isolate the exact tenant/store
+        // If an owner member failed Supabase Auth above, do not let them bypass owner password
+        const staffMembers = memberRows.filter((m) => m.role !== 'owner');
+        const targetList = staffMembers.length > 0 ? staffMembers : memberRows;
+
         const matchedMember =
-          memberRows.find((m) => {
+          targetList.find((m) => {
             const saved = m.permissions?._auth_password;
             return saved && saved === pass;
-          }) || memberRows[0];
+          }) || targetList[0];
 
         const mem = matchedMember;
         const savedPass = mem.permissions?._auth_password;
@@ -567,7 +635,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const effectivePass = savedPass || localPass;
 
-        // If password matches, or if no password was saved yet for this member (adopt entered pass):
+        // If member is owner and reached here, password must match
+        if (mem.role === 'owner' && effectivePass !== pass) {
+          const msg = 'Email atau kata sandi akun pemilik toko salah.';
+          setError(msg);
+          throw new Error(msg);
+        }
+
+        // If password matches, or if no password was saved yet for this staff member (adopt entered pass):
         if (effectivePass === pass || !effectivePass) {
           if (!savedPass) {
             const updatedPerms = { ...(mem.permissions || {}), _auth_password: pass };
@@ -616,66 +691,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     } catch (staffErr: any) {
-      if (staffErr.message?.includes('Kata sandi')) {
+      if (staffErr.message?.includes('Kata sandi') || staffErr.message?.includes('pemilik')) {
         throw staffErr;
       }
       console.warn('[Staff login check notice]:', staffErr);
     }
 
-    // 2. Standard login via Supabase Auth (for Owner / Admin with Supabase Auth credentials)
-    let resolvedEmail = cleanInput;
-    if (!resolvedEmail.includes('@')) {
-      const message = `Username "${emailOrUsername}" tidak ditemukan di daftar anggota tim. Masukkan email lengkap akun Anda.`;
-      setError(message);
-      throw new Error(message);
-    }
+    // 3. Fallback error messages
+    if (cleanInput.includes('@')) {
+      const { data: profileRows } = await supabase
+        .from('user_profiles')
+        .select('uid, email')
+        .eq('email', cleanInput)
+        .limit(1);
 
-    try {
-      const { data, error: signInErr } = await supabase.auth.signInWithPassword({
-        email: resolvedEmail,
-        password: pass,
-      });
-
-      if (signInErr) {
-        let msg = signInErr.message;
-        if (msg.includes('Invalid login credentials')) {
-          const { data: profileRows } = await supabase
-            .from('user_profiles')
-            .select('uid, email')
-            .eq('email', resolvedEmail)
-            .limit(1);
-
-          if (profileRows && profileRows.length > 0) {
-            msg = `Email "${resolvedEmail}" terdaftar menggunakan akun Google (belum memiliki password terpisah). Silakan masuk dengan tombol "Lanjutkan dengan Google", atau gunakan tautan "Lupa password?" di bawah untuk membuat password email akun ini.`;
-          } else {
-            msg = 'Email atau password yang Anda masukkan salah. Jika belum memiliki akun, silakan pilih tab "Daftar" untuk mendaftar akun baru.';
-          }
-        } else if (msg.includes('Email not confirmed')) {
-          msg = 'Email belum diverifikasi. Buka kotak masuk email Anda dan klik tautan konfirmasi dari Supabase, atau matikan opsi "Confirm email" di Supabase Dashboard (Authentication > Providers > Email).';
-        }
+      if (profileRows && profileRows.length > 0) {
+        const msg = `Email "${cleanInput}" terdaftar menggunakan akun Google (belum memiliki password terpisah). Silakan masuk dengan tombol "Lanjutkan dengan Google", atau gunakan tautan "Lupa password?" di bawah untuk membuat password email akun ini.`;
         setError(msg);
         throw new Error(msg);
       }
-
-      if (data.user) {
-        updateSessionActivity();
-        setSessionExpired(false);
-        try {
-          localStorage.removeItem(SESSION_EXPIRED_NOTICE_KEY);
-        } catch {}
-
-        setCurrentUser(data.user);
-        const profile = await resolveUserProfileFromSupabase(data.user);
-        setUserProfile(profile);
-        try {
-          localStorage.setItem('kasirku_cached_user_profile', JSON.stringify(profile));
-        } catch {}
-      }
-    } catch (err: any) {
-      const msg = err instanceof Error ? err.message : 'Gagal login';
-      setError(msg);
-      throw err;
     }
+
+    const msg = cleanInput.includes('@')
+      ? 'Email atau password yang Anda masukkan salah. Jika belum memiliki akun, silakan pilih tab "Daftar" untuk mendaftar akun baru.'
+      : `Username "${emailOrUsername}" tidak ditemukan di daftar anggota tim. Masukkan email lengkap akun Anda.`;
+    setError(msg);
+    throw new Error(msg);
   };
 
   const updateUserPassword = async (newPassword: string) => {

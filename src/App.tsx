@@ -868,8 +868,33 @@ function AppWithAuth() {
     updateUserPassword,
     cancelPasswordRecovery,
   } = useAuth();
-  const [showLanding, setShowLanding] = useState(true);
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [showLanding, setShowLanding] = useState(() => {
+    try {
+      const path = window.location.pathname;
+      const hash = window.location.hash;
+      const search = window.location.search;
+      if (
+        path === '/login' ||
+        path === '/register' ||
+        path === '/auth' ||
+        hash === '#login' ||
+        hash === '#register' ||
+        search.includes('mode=login') ||
+        search.includes('mode=register')
+      ) {
+        return false;
+      }
+    } catch {}
+    return true;
+  });
+  const [authMode, setAuthMode] = useState<'login' | 'register'>(() => {
+    try {
+      const path = window.location.pathname;
+      const hash = window.location.hash;
+      if (path === '/register' || hash === '#register') return 'register';
+    } catch {}
+    return 'login';
+  });
 
   return (
     <>
