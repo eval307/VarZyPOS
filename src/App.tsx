@@ -85,6 +85,9 @@ function POSAppContent() {
     if (storeId) {
       setStoreStorage(storeId, 'active_tab', 'dashboard');
     }
+    applyTheme('light', false);
+    applyThemeAccent('emerald', false);
+    applyBackgroundTheme('default', '', false);
     await logout(false);
   };
 
@@ -862,10 +865,14 @@ function AppWithAuth() {
   const [showLanding, setShowLanding] = useState(true);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
-  // Whenever unauthenticated, ALWAYS ensure the main landing page is shown first
+  // Whenever unauthenticated, ALWAYS ensure the main landing page is shown first,
+  // and lock public views (Landing, Login, Register) to default fresh green theme
   useEffect(() => {
     if (!userProfile) {
       setShowLanding(true);
+      applyTheme('light', false);
+      applyThemeAccent('emerald', false);
+      applyBackgroundTheme('default', '', false);
     }
   }, [userProfile]);
 
@@ -880,10 +887,10 @@ function AppWithAuth() {
       )}
 
       {loading ? (
-        <div className="min-h-screen bg-neutral-900 flex flex-col items-center justify-center p-4">
-          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />
-          <h2 className="text-white text-base font-semibold tracking-wide">Memuat KasirKu POS...</h2>
-          <p className="text-neutral-400 text-xs mt-1">Menghubungkan ke Supabase Cloud</p>
+        <div className="public-theme-locked min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-4">
+          <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mb-4" />
+          <h2 className="text-neutral-900 text-base font-semibold tracking-wide">Memuat VarzyPos...</h2>
+          <p className="text-neutral-500 text-xs mt-1">Sistem Kasir &amp; Stok Real-Time</p>
         </div>
       ) : !userProfile ? (
         showLanding ? (

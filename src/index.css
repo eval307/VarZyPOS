@@ -303,3 +303,109 @@ html.dark .hover\:bg-neutral-200:hover {
 #receipt-print-area img {
   background-color: transparent !important;
 }
+
+/* ============================================================
+   PUBLIC THEME LOCK (Landing Page, Login, Register)
+   Halaman publik selalu terkunci pada tema default hijau segar
+   dan tidak terpengaruh oleh pergantian mode gelap / warna aksen
+   ============================================================ */
+.public-theme-locked {
+  --color-emerald-50: #f0fdfa !important;
+  --color-emerald-100: #ccfbf1 !important;
+  --color-emerald-200: #99f6e4 !important;
+  --color-emerald-300: #5eead4 !important;
+  --color-emerald-400: #2dd4bf !important;
+  --color-emerald-500: #14b8a6 !important;
+  --color-emerald-600: #0d9488 !important;
+  --color-emerald-700: #0f766e !important;
+  --color-emerald-800: #115e59 !important;
+  --color-emerald-900: #134e4a !important;
+  --color-emerald-950: #042f2e !important;
+  --color-teal-600: #0d9488 !important;
+  --color-teal-700: #0f766e !important;
+  color-scheme: light !important;
+}
+
+html.dark .public-theme-locked,
+.public-theme-locked {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.dark .public-theme-locked .bg-white,
+.public-theme-locked .bg-white {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+html.dark .public-theme-locked .bg-neutral-50,
+.public-theme-locked .bg-neutral-50 {
+  background-color: #f8fafc !important;
+}
+
+html.dark .public-theme-locked .bg-neutral-100,
+html.dark .public-theme-locked .bg-neutral-100\/60,
+html.dark .public-theme-locked .bg-neutral-100\/70,
+.public-theme-locked .bg-neutral-100,
+.public-theme-locked .bg-neutral-100\/60,
+.public-theme-locked .bg-neutral-100\/70 {
+  background-color: #f1f5f9 !important;
+}
+
+html.dark .public-theme-locked .border-neutral-100,
+html.dark .public-theme-locked .border-neutral-200,
+html.dark .public-theme-locked .border-neutral-200\/60,
+html.dark .public-theme-locked .border-neutral-200\/70,
+html.dark .public-theme-locked .border-neutral-200\/80,
+html.dark .public-theme-locked .border-neutral-200\/90,
+.public-theme-locked .border-neutral-100,
+.public-theme-locked .border-neutral-200,
+.public-theme-locked .border-neutral-200\/60,
+.public-theme-locked .border-neutral-200\/70,
+.public-theme-locked .border-neutral-200\/80,
+.public-theme-locked .border-neutral-200\/90 {
+  border-color: #e2e8f0 !important;
+}
+
+html.dark .public-theme-locked .text-neutral-900,
+.public-theme-locked .text-neutral-900 {
+  color: #0f172a !important;
+}
+
+html.dark .public-theme-locked .text-neutral-800,
+.public-theme-locked .text-neutral-800 {
+  color: #1e293b !important;
+}
+
+html.dark .public-theme-locked .text-neutral-700,
+.public-theme-locked .text-neutral-700 {
+  color: #334155 !important;
+}
+
+html.dark .public-theme-locked .text-neutral-600,
+.public-theme-locked .text-neutral-600 {
+  color: #475569 !important;
+}
+
+html.dark .public-theme-locked .text-neutral-500,
+.public-theme-locked .text-neutral-500 {
+  color: #64748b !important;
+}
+
+html.dark .public-theme-locked .text-neutral-400,
+.public-theme-locked .text-neutral-400 {
+  color: #94a3b8 !important;
+}
+
+html.dark .public-theme-locked input:not([type="checkbox"]):not([type="radio"]),
+.public-theme-locked input:not([type="checkbox"]):not([type="radio"]) {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.dark .public-theme-locked input::placeholder,
+.public-theme-locked input::placeholder {
+  color: #94a3b8 !important;
+}
+
