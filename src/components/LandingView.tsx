@@ -18,7 +18,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { soundFx } from "../utils/audio";
 
 interface LandingViewProps {
-  onOpenAuth: (mode: 'login' | 'register') => void;
+  onOpenAuth?: (mode: 'login' | 'register') => void;
+  onGetStarted?: () => void;
+  onSignIn?: () => void;
 }
 
 const DotMapBg = () => {
@@ -119,8 +121,19 @@ const DotMapBg = () => {
   );
 };
 
-export const LandingView: React.FC<LandingViewProps> = ({ onOpenAuth }) => {
+export const LandingView: React.FC<LandingViewProps> = ({ onOpenAuth, onGetStarted, onSignIn }) => {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+
+  const handleAuth = (mode: 'login' | 'register') => {
+    soundFx.playTap();
+    if (onOpenAuth) {
+      onOpenAuth(mode);
+    } else if (mode === 'register' && onGetStarted) {
+      onGetStarted();
+    } else if (mode === 'login' && onSignIn) {
+      onSignIn();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white text-neutral-900 font-sans selection:bg-emerald-500 selection:text-white relative overflow-hidden">
@@ -150,10 +163,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onOpenAuth }) => {
             className="flex items-center gap-3"
           >
             <button
-              onClick={() => {
-                soundFx.playTap();
-                onOpenAuth('login');
-              }}
+              onClick={() => handleAuth('login')}
               className="px-4 py-2 text-xs font-semibold text-neutral-700 hover:text-neutral-900 transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <LogIn className="w-3.5 h-3.5" />
@@ -162,10 +172,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onOpenAuth }) => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                soundFx.playTap();
-                onOpenAuth('register');
-              }}
+              onClick={() => handleAuth('register')}
               className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-sm shadow-emerald-200 flex items-center gap-1.5 cursor-pointer"
             >
               <UserPlus className="w-3.5 h-3.5" />
@@ -215,10 +222,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onOpenAuth }) => {
             <motion.button
               whileHover={{ scale: 1.03, boxShadow: '0 10px 25px -5px rgba(16, 185, 129, 0.4)' }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => {
-                soundFx.playTap();
-                onOpenAuth('register');
-              }}
+              onClick={() => handleAuth('register')}
               className="w-full sm:w-auto px-7 py-4 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Mulai Toko Gratis Sekarang</span>
@@ -227,10 +231,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onOpenAuth }) => {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => {
-                soundFx.playTap();
-                onOpenAuth('login');
-              }}
+              onClick={() => handleAuth('login')}
               className="w-full sm:w-auto px-7 py-4 text-xs font-bold text-neutral-700 bg-white hover:bg-neutral-50 border border-neutral-200 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Sudah Punya Akun? Masuk</span>

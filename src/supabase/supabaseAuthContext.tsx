@@ -509,10 +509,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     setError(null);
     try {
+      const redirectUrl = typeof window !== 'undefined' ? `${window.location.origin}/` : undefined;
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
 
@@ -763,8 +768,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const sendPasswordReset = async (email: string) => {
     setError(null);
     try {
+      const redirectUrl = typeof window !== 'undefined' ? `${window.location.origin}/` : undefined;
       const { error: resetErr } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-        redirectTo: window.location.origin,
+        redirectTo: redirectUrl,
       });
       if (resetErr) {
         throw resetErr;

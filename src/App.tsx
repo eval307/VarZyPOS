@@ -868,7 +868,7 @@ function AppWithAuth() {
     updateUserPassword,
     cancelPasswordRecovery,
   } = useAuth();
-  const [showLanding, setShowLanding] = useState(false);
+  const [showLanding, setShowLanding] = useState(true);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   return (
@@ -890,6 +890,10 @@ function AppWithAuth() {
       ) : !userProfile ? (
         showLanding ? (
           <LandingView
+            onOpenAuth={(mode) => {
+              setAuthMode(mode);
+              setShowLanding(false);
+            }}
             onGetStarted={() => {
               setAuthMode('register');
               setShowLanding(false);
