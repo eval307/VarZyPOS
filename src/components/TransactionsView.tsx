@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Transaction, PaymentMethod } from '../types/pos';
+import { Transaction, PaymentMethod, StoreSettings } from '../types/pos';
 import { formatRupiah, formatTanggal } from '../utils/format';
 import { soundFx } from '../utils/audio';
 import { useTranslation } from '../context/LanguageContext';
+import { exportTransactionsToExcel } from '../utils/excelExport';
 import {
   History,
   Search,
@@ -22,12 +23,16 @@ import {
 
 interface TransactionsViewProps {
   transactions: Transaction[];
-  onViewReceipt: (transaction: Transaction) => void;
+  storeSettings?: StoreSettings;
+  onPrintReceipt?: (transaction: Transaction) => void;
+  onViewReceipt?: (transaction: Transaction) => void;
   onCancelTransaction: (transactionId: string, reason: string) => void;
 }
 
 export const TransactionsView: React.FC<TransactionsViewProps> = ({
   transactions,
+  storeSettings,
+  onPrintReceipt,
   onViewReceipt,
   onCancelTransaction,
 }) => {
@@ -140,9 +145,9 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({
           </div>
         </div>
 
-        {/* Total Turnover Metric Banner */}
-        <div className="flex items-center gap-3 w-full sm:w-auto bg-neutral-50 dark:bg-neutral-800/60 p-3 sm:p-3.5 rounded-xl border border-neutral-200/80 dark:border-neutral-700/80 justify-between sm:justify-start">
-          <div>
+        {/* Total Turnover Metric Banner & Export Button */}
+        <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-start">
+          <div className="flex-1 sm:flex-initial bg-neutral-50 dark:bg-neutral-800/60 p-3 sm:p-3.5 rounded-xl border border-neutral-200/80 dark:border-neutral-700/80">
             <div className="text-[10px] sm:text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
               {language === 'en' ? 'Total Turnover' : 'Total Omzet Saring'}
             </div>
@@ -150,6 +155,20 @@ export const TransactionsView: React.FC<TransactionsViewProps> = ({
               {formatRupiah(totalCompletedAmount)}
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              soundFx.playTap();
+              exportTransactionsToExcel(filteredTransactions, storeSettings);
+            }}
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 shadow-sm shadow-emerald-600/30 rounded-xl transition-all whitespace-nowrap cursor-pointer shrink-0"
+            title="Ekspor transaksi saat ini ke Excel (.xls)"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span className="hidden sm:inline">{language === 'en' ? 'Export Excel' : 'Ekspor Excel (.XLS)'}</span>
+            <span className="sm:hidden">.XLS</span>
+          </button>
         </div>
       </div>
 

@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Transaction, Product, StockAdjustment } from '../types/pos';
+import { Transaction, Product, StockAdjustment, StoreSettings } from '../types/pos';
 import { formatRupiah, formatNumber, formatTanggal, formatTanggalPendek } from '../utils/format';
 import { soundFx } from '../utils/audio';
 import { useTranslation } from '../context/LanguageContext';
+import { exportSalesReportToExcel } from '../utils/excelExport';
 import { StockFinancialChart } from './charts/StockFinancialChart';
 import { PaymentRadarChart } from './charts/PaymentRadarChart';
 import {
@@ -18,6 +19,7 @@ import {
   ChevronRight,
   Filter,
   BarChart2,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 export type ReportPeriod = 'daily' | 'weekly' | 'monthly' | 'custom' | 'all';
@@ -26,6 +28,7 @@ interface ReportsViewProps {
   transactions: Transaction[];
   products: Product[];
   stockAdjustments: StockAdjustment[];
+  storeSettings?: StoreSettings;
   onViewReceipt?: (transaction: Transaction) => void;
 }
 
@@ -33,6 +36,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
   transactions,
   products,
   stockAdjustments,
+  storeSettings,
   onViewReceipt,
 }) => {
   const { t, language } = useTranslation();
@@ -253,6 +257,18 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
     };
   }, [filteredCompletedTx]);
 
+  // Export Period Report to Styled Rich Excel (.xls)
+  const exportPeriodReportExcel = () => {
+    soundFx.playTap();
+    exportSalesReportToExcel({
+      transactions: filteredCompletedTx,
+      periodLabel,
+      dateRangeDescription,
+      storeSettings,
+      analytics,
+    });
+  };
+
   // Export Period Report to CSV
   const exportPeriodReportCSV = () => {
     soundFx.playTap();
@@ -356,11 +372,20 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
 
           <div className="flex items-center gap-2">
             <button
+              onClick={exportPeriodReportExcel}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 shadow-sm shadow-emerald-600/30 rounded-xl transition-all whitespace-nowrap shrink-0 cursor-pointer"
+              title="Ekspor laporan bergaya lengkap ke Microsoft Excel (.xls)"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              <span>{language === 'en' ? 'Export Excel (.XLS)' : 'Ekspor Excel (.XLS)'}</span>
+            </button>
+            <button
               onClick={exportPeriodReportCSV}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800 rounded-xl transition-colors whitespace-nowrap shrink-0 shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm font-semibold text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              title="Ekspor format mentah CSV (.csv)"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>{language === 'en' ? 'Export CSV' : 'Ekspor Laporan (.CSV)'}</span>
+              <span>CSV</span>
             </button>
           </div>
         </div>

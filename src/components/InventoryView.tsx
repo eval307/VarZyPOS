@@ -28,11 +28,13 @@ import {
   Barcode,
   Printer,
   DollarSign,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { compressImageFile, PRODUCT_IMAGE_PRESETS } from '../utils/imageHelper';
 import { BarcodeRenderer } from './BarcodeRenderer';
 import { SkuBarcodeModal } from './SkuBarcodeModal';
 import { generateUniqueSku, isSkuUnique, SkuFormatType } from '../utils/skuGenerator';
+import { exportInventoryToExcel } from '../utils/excelExport';
 
 interface InventoryViewProps {
   products: Product[];
@@ -512,6 +514,19 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
             >
               <Barcode className="w-3.5 h-3.5" />
               <span>{language === 'en' ? 'SKU Barcode Printer' : 'Cetak Barcode SKU'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                soundFx.playTap();
+                exportInventoryToExcel(products, managedCategories, storeSettings);
+              }}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800 rounded-lg transition-colors whitespace-nowrap shadow-xs cursor-pointer shrink-0"
+              title={language === 'en' ? 'Export Stock Inventory to Excel (.XLS)' : 'Ekspor Stok Inventaris ke Excel (.XLS)'}
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <span>{language === 'en' ? 'Export Excel' : 'Ekspor Excel'}</span>
             </button>
 
             <button
